@@ -18,7 +18,7 @@ docutils==0.16
 executing==2.1.0
 filelock==3.18.0
 Flask==3.1.1
-flask-cors==5.0.1
+flask-cors==6.0.0
 fsspec==2025.3.2
 git-filter-repo==2.47.0
 huggingface-hub==0.31.2
