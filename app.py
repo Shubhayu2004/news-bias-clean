@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import requests
@@ -22,9 +22,9 @@ def extract_text_from_url(url):
     except Exception as e:
         return str(e)
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 def index():
-    return jsonify({"message": "Welcome to the Political Bias Detection API. Use POST /predict to get predictions."})
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/predict', methods=['POST'])
