@@ -22,6 +22,11 @@ def extract_text_from_url(url):
     except Exception as e:
         return str(e)
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "Welcome to the Political Bias Detection API. Use POST /predict to get predictions."})
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
