@@ -29,31 +29,36 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
-    input_type = data.get("inputType")
-    text = data.get("text", "")
+    try:
+        data = request.get_json()
+        input_type = data.get("inputType")
+        text = data.get("text", "")
 
-    if input_type == "url":
-        if not validators.url(text):
-            return jsonify({"error": "Invalid URL"}), 400
-        text = extract_text_from_url(text)
+        if input_type == "url":
+            if not validators.url(text):
+                return jsonify({"error": "Invalid URL"}), 400
+            text = extract_text_from_url(text)
+            if not text:
+                return jsonify({"error": "Failed to extract text from the URL"}), 500
+
         if not text:
-            return jsonify({"error": "Failed to extract text from the URL"}), 500
+            return jsonify({"error": "No text provided"}), 400
 
-    if not text:
-        return jsonify({"error": "No text provided"}), 400
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+        with torch.no_grad():
+            outputs = model(**inputs)
+            logits = outputs.logits
+            probabilities = torch.softmax(logits, dim=1)[0]
 
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        logits = outputs.logits
-        probabilities = torch.softmax(logits, dim=1)[0]
+        label = torch.argmax(probabilities).item()
+        confidence = probabilities[label].item()
+        labels = ["Left", "Center", "Right"]
 
-    label = torch.argmax(probabilities).item()
-    confidence = probabilities[label].item()
-    labels = ["Left", "Center", "Right"]
+        return jsonify({"label": labels[label], "confidence": confidence})
 
-    return jsonify({"label": labels[label], "confidence": confidence})
+    except Exception as e:
+        print("Error in /predict:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
