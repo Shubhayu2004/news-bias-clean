@@ -24,7 +24,7 @@ def extract_text_from_url(url):
 
 @app.route('/')
 def index():
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, 'app.html')
 
 
 @app.route('/predict', methods=['POST'])
